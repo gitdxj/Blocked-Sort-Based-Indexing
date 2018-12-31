@@ -7,16 +7,16 @@
 ## BSBI
 
 ## 短语查询
-短语查询可以使用带位置信息的索引表或者简单的双词索引。
+短语查询可以使用带位置信息的索引表或者简单的双词索引。  
 这次作业我们就水一水用双词索引吧！
 ### 双词索引
 每两个连续的词组成词对（作为短语）来索引。
 比如文本片段“Friend, Romans, Countrymen”会产生两个词对:
 * friends romans
-* romans countrymen
-索引构建时将每个词对看成一个词项放入词典中。
-查询时，将查询拆分成基于双词的布尔查询式。
-例如：stanford university palo alto,处理方法：
+* romans countrymen  
+索引构建时将每个词对看成一个词项放入词典中。  
+查询时，将查询拆分成基于双词的布尔查询式。  
+例如：stanford university palo alto,处理方法：  
 stanford university **AND** university palo **AND** palo alto
 
 
