@@ -1,7 +1,8 @@
 import csv
 import os
 import split
-
+from dictionary import Dictionary
+import language
 
 # 创建倒排索引,返回倒排索引表
 def create_index(file_name):
@@ -25,6 +26,20 @@ def create_index(file_name):
                 elif row_num not in inverted_index[string]:
                     inverted_index[string].append(row_num)
     return inverted_index
+
+
+# assignment#4的创建倒排索引的函数, ex表示extended
+def create_index_ex(file_name):
+    dic = Dictionary()
+    csv_file = open(file_name)
+    csv_reader = csv.reader(csv_file)
+    rows = [row for row in csv_reader]  # csv表格中每一行都在rows中了
+    for row_no in range(len(rows)):
+        row = rows[row_no]
+        for string in row:
+            words = language.text_process(string)
+            words = language.get_dictionary_list(words)
+
 
 
 # 为创建的倒排索引表文件命名
@@ -68,5 +83,5 @@ def get_index(filename):
     return inverted_index
 
 if __name__ == '__main__':
-    name = '/home/fr/Desktop/test.csv'
-    a = get_index(name)
+    name = 'test.csv'
+    a = create_index_ex(name)
