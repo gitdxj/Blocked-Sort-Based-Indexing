@@ -4,6 +4,7 @@ import split
 from dictionary import Dictionary
 import language
 
+
 # 创建倒排索引,返回倒排索引表
 def create_index(file_name):
     csv_file = open(file_name)
@@ -34,11 +35,30 @@ def create_index_ex(file_name):
     csv_file = open(file_name)
     csv_reader = csv.reader(csv_file)
     rows = [row for row in csv_reader]  # csv表格中每一行都在rows中了
+    # 每一个row结束之后进行merge
     for row_no in range(len(rows)):
-        row = rows[row_no]
-        for string in row:
+        index = {}  # 倒排索引表是一个词典，key为指向词典string的指针，value为docID，在这里为行号
+        row = rows[row_no]  # row是csv表格中的一行
+        for string in row:  # string是csv表格中的一项
             words = language.text_process(string)
-            words = language.get_dictionary_list(words)
+            words = language.get_dictionary_list(words)  # 完成分词
+            # 把csv表格中一项的所有词项写入词典，并建立索引表
+            for word in words:
+                dic.add(word)
+                word_ptr = dic.get_position(word)
+                if word_ptr not in index:  # 若倒排索引表中没有这个词项
+                    index[word_ptr] = []
+                    index[word_ptr].append(row_no)
+                else:  # 若倒排记录表中已经有了这个词项
+                    diff = 0
+                    for i in index[word_ptr]:
+                        diff += i
+                    diff = row_no - diff
+                    if diff != 0:
+                        index[word_ptr].append(diff)
+    dic.write2file('dictionary.txt')
+    return index
+
 
 
 
@@ -82,6 +102,8 @@ def get_index(filename):
         fw.close()
     return inverted_index
 
+
 if __name__ == '__main__':
     name = 'test.csv'
     a = create_index_ex(name)
+    print(a)
