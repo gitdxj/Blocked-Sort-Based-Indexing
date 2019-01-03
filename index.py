@@ -37,7 +37,7 @@ def create_index_ex(file_name):
     rows = [row for row in csv_reader]  # csv表格中每一行都在rows中了
     # 每一个row结束之后进行merge
     for row_no in range(len(rows)):
-        index = {}  # 倒排索引表是一个词典，key为指向词典string的指针，value为docID，在这里为行号
+        index = []  # 倒排索引表是一个列表
         row = rows[row_no]  # row是csv表格中的一行
         for string in row:  # string是csv表格中的一项
             words = language.text_process(string)
@@ -47,19 +47,78 @@ def create_index_ex(file_name):
                 dic.add(word)
                 word_ptr = dic.get_position(word)
                 if word_ptr not in index:  # 若倒排索引表中没有这个词项
-                    index[word_ptr] = []
-                    index[word_ptr].append(row_no)
-                else:  # 若倒排记录表中已经有了这个词项
-                    diff = 0
-                    for i in index[word_ptr]:
-                        diff += i
-                    diff = row_no - diff
-                    if diff != 0:
-                        index[word_ptr].append(diff)
+                    index.append(word_ptr)
+        index = sorted(index)
+        # 把index里面的term_ptr转为字符串，这一步是为了后面的join
+        for i in range(len(index)):
+            index[i] = str(index[i])
+        # 读完每一行就创建一个文件来保存这一行中出现的term指针
+        f_name = str(row_no) + '.txt'
+        f_name = 'index/' + f_name
+        f = open(f_name, 'w')
+        doc_content = ','.join(index)
+        # 指针列表也不会太大，我到时候直接读一个文件进来也不过分
+        f.write(doc_content)
+        f.close()
+        # print(index)
     dic.write2file('dictionary.txt')
     return index
 
 
+# 把create_index_ex中得到的好多好多个文件都merge起来，合成一个大倒排索引表.txt
+def merge(doc_num):
+    filename = 'inverted_index.txt'
+    f = open(filename, 'w')
+    f.close()
+    ''' 
+    打开一个之前建立好的一个文档的索引文件，例如0.txt，其中记录了docID为0的文档中词项的集合
+    读入，得到doc_term_list
+    然后打开总的倒排记录表文件，按行读取，把读到的词项都加到index_term_list中
+    对于doc_term_list和index_term_list中都有的词项，把docID加到相应倒排记录上
+    对于doc_term_list中有而index_term_list中没有的词项，创建新的倒排记录项
+    '''
+    for doc_no in range(doc_num):
+        doc_name = 'index/' + str(doc_no) + '.txt'
+        doc_file = open(doc_name, 'r')
+        doc_term_list = doc_file.read().split(',')  # term_list是doc_no文档中的词项集合
+        index_term_list = []  # 用来记录当前倒排索引表中的所有词项
+        index_file = open(filename, 'r')
+        data = []
+        while True:
+            line = index_file.readline()
+            if not line:
+                break
+            find_semicolon = line.find(':')
+            index_term = line[0:find_semicolon]
+            index_term_list.append(index_term)
+            if index_term in doc_term_list:  # 如果这个词项在doc_no中出现过，则把doc_no加在倒排记录表上
+                line = line.strip('\n')  # 去掉尾部的\n
+                line = line + ',' + str(doc_no) + '\n'
+            data.append(line)
+        index_file.close()
+        for doc_term in doc_term_list:
+            if doc_term not in index_term_list:
+                new_line = str(doc_term) + ':' + str(doc_no) + '\n'
+                data.append(new_line)
+        index_file = open(filename, 'w')
+        index_file.writelines(data)
+
+
+def read_index_file():
+    index = {}
+    if not os.path.isfile('inverted_index.txt'):
+        return index
+    file = open('inverted_index.txt', 'r')
+    while True:
+        line = file.readline()
+        if not line:
+            break
+        find_semicolon = line.find(':')
+        index_term = line[0:find_semicolon]
+        posting_list = line[find_semicolon+1:].strip('\n').split(',')
+        if index_term not in index:
+            index[index_term] = posting_list
+    return index
 
 
 # 为创建的倒排索引表文件命名
@@ -104,6 +163,7 @@ def get_index(filename):
 
 
 if __name__ == '__main__':
-    name = 'test.csv'
-    a = create_index_ex(name)
-    print(a)
+    index = read_index_file()
+    dic = Dictionary()
+    dic.read_file(index)
+    dic.print_dic()

@@ -21,6 +21,21 @@ class Dictionary:
     def get_position(self, word):
         return self.__dic[word]
 
+    def read_file(self, inverted_index):
+        index = [i for i in inverted_index]
+        file = open('dictionary.txt', 'r')
+        string = file.read()
+        file.close()
+        for i in range(len(index)):
+            ptr = int(index[i])
+            if i + 1 < len(index):
+                next_ptr = int(index[i+1])
+                word = string[ptr:next_ptr]
+                self.add(word)
+            else:
+                word = string[ptr:]
+                self.add(word)
+
     # def readfile(self, filename):
     #     self.__dic = []  # 词典清空
     #     file = open(filename, "r")
@@ -35,18 +50,18 @@ class Dictionary:
     #         i = i + word_len + 1
 
 
-
-
-
-
 if __name__ == '__main__':
 
     dic = Dictionary()
 
-    dic.add("word")
-    dic.add("new")
-    dic.add("hello world")
-    dic.add("new")
-    dic.write2file("index.txt")
+    # dic.add("word")
+    # dic.add("new")
+    # dic.add("hello world")
+    # dic.add("new")
+    # dic.write2file("index.txt")
+    # dic.print_dic()
+    # string = 'hello,world'
+    # print(string[2:4])
+    dic.read_file()
     dic.print_dic()
 
