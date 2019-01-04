@@ -13,22 +13,37 @@ def infix2postfix(infixexpr):  # 参数是中缀表达式
     tokenList = infixexpr.split()
     new_list = []
     current_token = None
+    # for i in range(len(tokenList)):
+    #     if tokenList[i] in operatorList or tokenList[i] in ['(', ')']:
+    #         if not (current_token in operatorList or current_token in ['(', ')']):
+    #             new_list.append(current_token)
+    #         current_token = tokenList[i]
+    #         new_list.append(current_token)
+    #     # 若此词是一个普通单词，并且current_token也是一个普通单词或短语
+    #     elif current_token not in operatorList and current_token not in ['(', ')']:
+    #         if current_token is None:
+    #             current_token = tokenList[i]
+    #         else:
+    #             current_token = current_token + ' ' + tokenList[i]
+    #     # 此词是一个普通单词但，current_token是操作符或者括号
+    #     else:
+    #         current_token = tokenList[i]
     for i in range(len(tokenList)):
+        # 若为操作符或括号，就直接添加到new_list里面
         if tokenList[i] in operatorList or tokenList[i] in ['(', ')']:
-            if not (current_token in operatorList or current_token in ['(', ')']):
+            if current_token:  # 若current_token不是None
                 new_list.append(current_token)
+            current_token = None
+            new_list.append(tokenList[i])
+        elif current_token is None:
             current_token = tokenList[i]
-            new_list.append(current_token)
-        # 若此词是一个普通单词，并且current_token也是一个普通单词或短语
-        elif current_token not in operatorList and current_token not in ['(', ')']:
-            if current_token is None:
-                current_token = tokenList[i]
-            else:
-                current_token = current_token + ' ' + tokenList[i]
-        # 此词是一个普通单词但，current_token是操作符或者括号
         else:
-            current_token = tokenList[i]
+            current_token = current_token + ' ' + tokenList[i]
+        if i == len(tokenList) - 1:  # 执行到最后
+            if current_token:  # 若current_token不是None
+                new_list.append(current_token)
     tokenList = []
+    print(new_list)
     for phrase in new_list:
         '''
         把长度超过三个词的短语分成双词短语
@@ -36,10 +51,11 @@ def infix2postfix(infixexpr):  # 参数是中缀表达式
         分成： Frank Underwood AND Underwood Claire
         '''
         split_phrase = []
-        if ' ' in phrase:
+        if ' ' in phrase:  # 如果是一个短语，就分词
             split_phrase = phrase.split(' ')
         else:
-            break
+            tokenList.append(phrase)
+            continue
         if len(split_phrase) < 3:
             tokenList.append(phrase)
         else:
@@ -75,7 +91,6 @@ def infix2postfix(infixexpr):  # 参数是中缀表达式
 
 if __name__ == '__main__':
     expr = 'Frank Underwood Claire AND ( M OR Lisa )'
-    expr1 = 'Frank AND good'
     post = infix2postfix(expr)
-    print(infix2postfix(expr1))
+    print(post)
 
